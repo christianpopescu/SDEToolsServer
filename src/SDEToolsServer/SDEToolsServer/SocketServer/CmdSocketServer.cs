@@ -3,21 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
+using SDEToolsServer.Config;
 
 namespace SocketServer
 {
     /// <summary>
     /// Runs a simple socket server
-    /// accepts lines ended by CR+LF (Windows)
-    /// accepts commands
+    /// - accepts lines ended by CR+LF (Windows)
+    /// - accepts commands
+    /// - process one request par thread
     ///  - exit -> exit the connection
     /// Tested with telnet local connection
     /// </summary>
     public class CmdSocketServer
     {
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         protected const byte CR = 0x0d;
         protected const byte LF = 0x0a;
 
@@ -32,7 +38,7 @@ namespace SocketServer
         }
 
         /// <summary>
-        /// 
+        /// Factory method to create a socket server
         /// </summary>
         /// <param name="pPort"> listening port</param>SimpleSocketServerCmd
         /// <param name="pBacklog">maximum number of connections</param>
@@ -40,6 +46,16 @@ namespace SocketServer
         public static CmdSocketServer GetSimpleSocketServer(int pPort, int pBacklog = 0)
         {
             return new CmdSocketServer() {Port = pPort, Backlog = pBacklog};
+        }
+
+        /// <summary>
+        /// Factory method to create a socket server
+        /// </summary>
+        /// <param name="pConfigSection"> configuration section </param>SimpleSocketServerCmd
+        /// <returns></returns>
+        public static CmdSocketServer GetSimpleSocketServer(SocketServerConfigSection pConfigSection)
+        {
+            return GetSimpleSocketServer(int.Parse(pConfigSection.Port), int.Parse(pConfigSection.Backlog));
         }
 
         public void Listen()
@@ -52,7 +68,7 @@ namespace SocketServer
             }
             catch (SocketException ex)
             {
-                Console.WriteLine(ex.ErrorCode + ": " + ex.Message);
+                log.Error(ex.ErrorCode + ": " + ex.Message);
                 throw;
             }
 
@@ -88,7 +104,7 @@ namespace SocketServer
                 
                 string command = data.ToString().Replace("\r\n", "");
                 // Show the command on the console.  
-                Console.WriteLine("Command received : {0}", data);
+                log.Info($"Command received : {data}");
                 
                 string commandResult = "";
                 if (command.Equals("quit"))

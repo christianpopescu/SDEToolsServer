@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using log4net;
 using SDEToolsServer.Config;
+using SocketServer;
 
 namespace SDEToolsServer.Application
 {
@@ -17,6 +18,8 @@ namespace SDEToolsServer.Application
     public class Application
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+ 
 
         // To do: Create a more generic configuration intialization (builder or injector)
         public Application()
@@ -30,11 +33,20 @@ namespace SDEToolsServer.Application
             get; private set;
         }
 
-        public int Run()
+        protected CmdSocketServer SocketServer { get; set; }
+
+        protected void Init()
         {
             log4net.Config.XmlConfigurator.Configure();
-            var ssc = Config.GetSection("SocketServer") as SocketServerConfigSection;
-            log.Info("PORT" + ssc.Port);
+            SocketServer = CmdSocketServer.GetSimpleSocketServer(Config.GetSection("SocketServer") as SocketServerConfigSection);
+            
+
+        }
+
+        public int Run()
+        {
+            this.Init();
+            SocketServer.Listen();
             ThreadContext.Stacks["NDC"].Push("Application");
             log.Info("----- SDEToolsServer - Started! ------");
             return 0;

@@ -9,7 +9,10 @@ namespace SDEToolsServer.Config
 {
     public class SocketServerConfigSection : ConfigurationSection
     {
-        [ConfigurationProperty("port",
+        private const string TagPort = "port";
+        private const string TagBacklog = "backlog";
+
+        [ConfigurationProperty(TagPort,
             IsRequired = true,
             IsKey = false)]
         public string Port
@@ -17,11 +20,27 @@ namespace SDEToolsServer.Config
 
             get
             {
-                return (string)this["port"];
+                return (string)this[TagPort];
             }
             set
             {
-                this["port"] = value;
+                this[TagPort] = value;
+            }
+        }
+
+        [ConfigurationProperty(TagBacklog,
+            IsRequired = true,
+            IsKey = false)]
+        public string Backlog
+        {
+
+            get
+            {
+                return (string)this[TagBacklog];
+            }
+            set
+            {
+                this[TagBacklog] = value;
             }
         }
     }
