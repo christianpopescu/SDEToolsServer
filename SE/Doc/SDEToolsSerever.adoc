@@ -1,0 +1,22 @@
+= SDE Tools Server Technical Documentation
+
+== Class diagram
+
+[plantuml, target=diagram-classes, format=png]
+....
+class Application
+class CmdSocketServer
+{
+    +{static}GetSimpleSocketServer()
+}
+note right of CmdSocketServer::GetSimpleSocketServer
+  factory method
+end note
+class SocketServerConfigSection
+
+Application : +run()
+Application : #init()
+
+Application - SocketServerConfigSection : uses >
+Application -- CmdSocketServer  : uses >
+....
